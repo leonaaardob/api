@@ -1,0 +1,12 @@
+- role_name: administrator
+  role_set:
+    - match_organizer
+    - user
+    - tournament_organizer
+- role_name: match_organizer
+  role_set:
+    - user
+- role_name: tournament_organizer
+  role_set:
+    - match_organizer
+    - user

@@ -1,0 +1,35 @@
+table:
+  name: map_pools
+  schema: public
+object_relationships:
+  - name: e_type
+    using:
+      foreign_key_constraint_on: type
+array_relationships:
+  - name: maps
+    using:
+      manual_configuration:
+        column_mapping:
+          id: map_pool_id
+        insertion_order: null
+        remote_table:
+          name: v_pool_maps
+          schema: public
+insert_permissions:
+  - role: user
+    permission:
+      check: {}
+      columns:
+        - id
+        - type
+    comment: ""
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - enabled
+        - id
+        - type
+        - seed
+      filter: {}
+    comment: ""

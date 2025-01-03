@@ -1,0 +1,551 @@
+table:
+  name: matches
+  schema: public
+object_relationships:
+  - name: e_match_status
+    using:
+      foreign_key_constraint_on: status
+  - name: e_region
+    using:
+      foreign_key_constraint_on: region
+  - name: lineup_1
+    using:
+      foreign_key_constraint_on: lineup_1_id
+  - name: lineup_2
+    using:
+      foreign_key_constraint_on: lineup_2_id
+  - name: options
+    using:
+      foreign_key_constraint_on: match_options_id
+  - name: organizer
+    using:
+      manual_configuration:
+        column_mapping:
+          organizer_steam_id: steam_id
+        insertion_order: null
+        remote_table:
+          name: players
+          schema: public
+  - name: server
+    using:
+      foreign_key_constraint_on: server_id
+  - name: winner
+    using:
+      manual_configuration:
+        column_mapping:
+          winning_lineup_id: id
+        insertion_order: null
+        remote_table:
+          name: match_lineups
+          schema: public
+array_relationships:
+  - name: demos
+    using:
+      foreign_key_constraint_on:
+        column: match_id
+        table:
+          name: match_map_demos
+          schema: public
+  - name: map_veto_picks
+    using:
+      foreign_key_constraint_on:
+        column: match_id
+        table:
+          name: match_map_veto_picks
+          schema: public
+  - name: match_maps
+    using:
+      foreign_key_constraint_on:
+        column: match_id
+        table:
+          name: match_maps
+          schema: public
+  - name: player_assists
+    using:
+      foreign_key_constraint_on:
+        column: match_id
+        table:
+          name: player_assists
+          schema: public
+  - name: player_damages
+    using:
+      foreign_key_constraint_on:
+        column: match_id
+        table:
+          name: player_damages
+          schema: public
+  - name: player_flashes
+    using:
+      foreign_key_constraint_on:
+        column: match_id
+        table:
+          name: player_flashes
+          schema: public
+  - name: player_kills
+    using:
+      foreign_key_constraint_on:
+        column: match_id
+        table:
+          name: player_kills
+          schema: public
+  - name: player_objectives
+    using:
+      foreign_key_constraint_on:
+        column: match_id
+        table:
+          name: player_objectives
+          schema: public
+  - name: player_unused_utilities
+    using:
+      foreign_key_constraint_on:
+        column: match_id
+        table:
+          name: player_unused_utility
+          schema: public
+  - name: player_utility
+    using:
+      foreign_key_constraint_on:
+        column: match_id
+        table:
+          name: player_utility
+          schema: public
+  - name: region_veto_picks
+    using:
+      foreign_key_constraint_on:
+        column: match_id
+        table:
+          name: match_region_veto_picks
+          schema: public
+  - name: tournament_brackets
+    using:
+      foreign_key_constraint_on:
+        column: match_id
+        table:
+          name: tournament_brackets
+          schema: public
+computed_fields:
+  - name: can_assign_server
+    definition:
+      function:
+        name: can_assign_server_to_match
+        schema: public
+      session_argument: hasura_session
+  - name: can_cancel
+    definition:
+      function:
+        name: can_cancel_match
+        schema: public
+      session_argument: hasura_session
+  - name: can_check_in
+    definition:
+      function:
+        name: can_check_in
+        schema: public
+      session_argument: hasura_session
+  - name: can_schedule
+    definition:
+      function:
+        name: can_schedule_match
+        schema: public
+      session_argument: hasura_session
+  - name: can_start
+    definition:
+      function:
+        name: can_start_match
+        schema: public
+      session_argument: hasura_session
+  - name: connection_link
+    definition:
+      function:
+        name: get_match_connection_link
+        schema: public
+      session_argument: hasura_session
+  - name: connection_string
+    definition:
+      function:
+        name: get_match_connection_string
+        schema: public
+      session_argument: hasura_session
+  - name: current_match_map_id
+    definition:
+      function:
+        name: get_current_match_map
+        schema: public
+  - name: invite_code
+    definition:
+      function:
+        name: match_invite_code
+        schema: public
+      session_argument: hasura_session
+  - name: is_captain
+    definition:
+      function:
+        name: is_captain
+        schema: public
+      session_argument: hasura_session
+  - name: is_coach
+    definition:
+      function:
+        name: is_coach
+        schema: public
+      session_argument: hasura_session
+  - name: is_in_lineup
+    definition:
+      function:
+        name: is_in_lineup
+        schema: public
+      session_argument: hasura_session
+  - name: is_match_server_available
+    definition:
+      function:
+        name: is_match_server_available
+        schema: public
+  - name: is_organizer
+    definition:
+      function:
+        name: is_match_organizer
+        schema: public
+      session_argument: hasura_session
+  - name: is_server_online
+    definition:
+      function:
+        name: is_server_online
+        schema: public
+  - name: is_tournament_match
+    definition:
+      function:
+        name: is_tournament_match
+        schema: public
+  - name: lineup_counts
+    definition:
+      function:
+        name: get_lineup_counts
+        schema: public
+  - name: map_veto_picking_lineup_id
+    definition:
+      function:
+        name: get_map_veto_picking_lineup_id
+        schema: public
+  - name: map_veto_type
+    definition:
+      function:
+        name: get_map_veto_type
+        schema: public
+  - name: max_players_per_lineup
+    definition:
+      function:
+        name: match_max_players_per_lineup
+        schema: public
+  - name: min_players_per_lineup
+    definition:
+      function:
+        name: match_min_players_per_lineup
+        schema: public
+  - name: region_veto_picking_lineup_id
+    definition:
+      function:
+        name: get_region_veto_picking_lineup_id
+        schema: public
+  - name: requested_organizer
+    definition:
+      function:
+        name: match_requested_organizer
+        schema: public
+      session_argument: hasura_session
+  - name: server_region
+    definition:
+      function:
+        name: get_match_server_region
+        schema: public
+  - name: server_type
+    definition:
+      function:
+        name: get_match_server_type
+        schema: public
+  - name: teams
+    definition:
+      function:
+        name: get_match_teams
+        schema: public
+  - name: tv_connection_link
+    definition:
+      function:
+        name: get_match_tv_connection_link
+        schema: public
+      session_argument: hasura_session
+  - name: tv_connection_string
+    definition:
+      function:
+        name: get_match_tv_connection_string
+        schema: public
+      session_argument: hasura_session
+insert_permissions:
+  - role: administrator
+    permission:
+      check: {}
+      set:
+        organizer_steam_id: x-hasura-user-id
+      columns:
+        - label
+        - match_options_id
+        - scheduled_at
+        - server_id
+    comment: ""
+  - role: match_organizer
+    permission:
+      check:
+        _or:
+          - _not:
+              _exists:
+                _table:
+                  name: settings
+                  schema: public
+                _where:
+                  name:
+                    _eq: public.create_matches_role
+          - _exists:
+              _table:
+                name: settings
+                schema: public
+              _where:
+                _and:
+                  - name:
+                      _eq: public.create_matches_role
+                  - value:
+                      _in:
+                        - user
+                        - match_organizer
+      set:
+        organizer_steam_id: x-hasura-user-id
+      columns:
+        - label
+        - match_options_id
+        - scheduled_at
+        - server_id
+    comment: ""
+  - role: tournament_organizer
+    permission:
+      check:
+        _or:
+          - _not:
+              _exists:
+                _table:
+                  name: settings
+                  schema: public
+                _where:
+                  name:
+                    _eq: public.create_matches_role
+          - _exists:
+              _table:
+                name: settings
+                schema: public
+              _where:
+                _and:
+                  - name:
+                      _eq: public.create_matches_role
+                  - value:
+                      _in:
+                        - user
+                        - match_organizer
+                        - tournament_organizer
+      set:
+        organizer_steam_id: x-hasura-user-id
+      columns:
+        - label
+        - match_options_id
+        - scheduled_at
+        - server_id
+    comment: ""
+  - role: user
+    permission:
+      check:
+        _or:
+          - _not:
+              _exists:
+                _table:
+                  name: settings
+                  schema: public
+                _where:
+                  name:
+                    _eq: public.create_matches_role
+          - _exists:
+              _table:
+                name: settings
+                schema: public
+              _where:
+                _and:
+                  - name:
+                      _eq: public.create_matches_role
+                  - value:
+                      _eq: user
+      set:
+        organizer_steam_id: x-hasura-user-id
+      columns:
+        - label
+        - match_options_id
+        - scheduled_at
+        - server_id
+    comment: ""
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - cancels_at
+        - created_at
+        - ended_at
+        - id
+        - label
+        - lineup_1_id
+        - lineup_2_id
+        - match_options_id
+        - organizer_steam_id
+        - region
+        - scheduled_at
+        - server_id
+        - started_at
+        - status
+        - winning_lineup_id
+      computed_fields:
+        - can_assign_server
+        - can_cancel
+        - can_check_in
+        - can_schedule
+        - can_start
+        - connection_link
+        - connection_string
+        - current_match_map_id
+        - invite_code
+        - is_captain
+        - is_coach
+        - is_in_lineup
+        - is_match_server_available
+        - is_organizer
+        - is_server_online
+        - is_tournament_match
+        - lineup_counts
+        - map_veto_picking_lineup_id
+        - map_veto_type
+        - max_players_per_lineup
+        - min_players_per_lineup
+        - region_veto_picking_lineup_id
+        - requested_organizer
+        - server_region
+        - server_type
+        - tv_connection_link
+        - tv_connection_string
+      filter:
+        _or:
+          - is_organizer:
+              _eq: true
+          - options:
+              lobby_access:
+                _in:
+                  - Open
+                  - Invite
+          - is_in_lineup:
+              _eq: true
+          - status:
+              _in:
+                - Finished
+                - Forfeit
+                - Tie
+      allow_aggregations: true
+    comment: ""
+update_permissions:
+  - role: administrator
+    permission:
+      columns:
+        - label
+        - organizer_steam_id
+        - region
+        - scheduled_at
+        - server_id
+        - winning_lineup_id
+      filter: {}
+      check: {}
+    comment: ""
+  - role: match_organizer
+    permission:
+      columns:
+        - label
+        - organizer_steam_id
+        - region
+        - scheduled_at
+        - server_id
+        - winning_lineup_id
+      filter:
+        is_tournament_match:
+          _eq: false
+      check:
+        is_tournament_match:
+          _eq: false
+    comment: ""
+  - role: tournament_organizer
+    permission:
+      columns:
+        - label
+        - organizer_steam_id
+        - scheduled_at
+        - server_id
+        - winning_lineup_id
+      filter:
+        is_tournament_match:
+          _eq: true
+      check:
+        is_tournament_match:
+          _eq: true
+    comment: ""
+  - role: user
+    permission:
+      columns:
+        - label
+        - organizer_steam_id
+        - region
+        - scheduled_at
+        - server_id
+        - winning_lineup_id
+      filter:
+        is_organizer:
+          _eq: true
+      check:
+        is_organizer:
+          _eq: true
+    comment: ""
+delete_permissions:
+  - role: administrator
+    permission:
+      filter: {}
+    comment: ""
+  - role: match_organizer
+    permission:
+      filter:
+        is_tournament_match:
+          _eq: false
+    comment: ""
+  - role: tournament_organizer
+    permission:
+      filter:
+        is_tournament_match:
+          _eq: true
+    comment: ""
+  - role: user
+    permission:
+      filter:
+        is_organizer:
+          _eq: true
+    comment: ""
+event_triggers:
+  - name: match_events
+    definition:
+      delete:
+        columns: '*'
+      enable_manual: true
+      insert:
+        columns: '*'
+      update:
+        columns: '*'
+    retry_conf:
+      interval_sec: 10
+      num_retries: 6
+      timeout_sec: 60
+    webhook: '{{HASURA_GRAPHQL_EVENT_HOOK}}'

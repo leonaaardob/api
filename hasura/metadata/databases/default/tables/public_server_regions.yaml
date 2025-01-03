@@ -1,0 +1,65 @@
+table:
+  name: server_regions
+  schema: public
+array_relationships:
+  - name: game_server_nodes
+    using:
+      foreign_key_constraint_on:
+        column: region
+        table:
+          name: game_server_nodes
+          schema: public
+computed_fields:
+  - name: available_server_count
+    definition:
+      function:
+        name: available_region_server_count
+        schema: public
+  - name: status
+    definition:
+      function:
+        name: region_status
+        schema: public
+  - name: total_server_count
+    definition:
+      function:
+        name: total_region_server_count
+        schema: public
+insert_permissions:
+  - role: administrator
+    permission:
+      check: {}
+      columns:
+        - description
+        - is_lan
+        - value
+    comment: ""
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - description
+        - is_lan
+        - value
+      computed_fields:
+        - available_server_count
+        - status
+        - total_server_count
+      filter: {}
+      allow_aggregations: true
+    comment: ""
+update_permissions:
+  - role: administrator
+    permission:
+      columns:
+        - description
+        - is_lan
+        - value
+      filter: {}
+      check: {}
+    comment: ""
+delete_permissions:
+  - role: administrator
+    permission:
+      filter: {}
+    comment: ""

@@ -1,0 +1,140 @@
+table:
+  name: servers
+  schema: public
+object_relationships:
+  - name: current_match
+    using:
+      manual_configuration:
+        column_mapping:
+          reserved_by_match_id: id
+        insertion_order: null
+        remote_table:
+          name: matches
+          schema: public
+  - name: game_server_node
+    using:
+      foreign_key_constraint_on: game_server_node_id
+array_relationships:
+  - name: matches
+    using:
+      foreign_key_constraint_on:
+        column: server_id
+        table:
+          name: matches
+          schema: public
+computed_fields:
+  - name: is_dedicated
+    definition:
+      function:
+        name: is_dedicated_server
+        schema: public
+insert_permissions:
+  - role: administrator
+    permission:
+      check: {}
+      columns:
+        - enabled
+        - host
+        - label
+        - port
+        - rcon_password
+        - region
+        - tv_port
+    comment: ""
+select_permissions:
+  - role: administrator
+    permission:
+      columns:
+        - api_password
+        - connected
+        - enabled
+        - host
+        - id
+        - label
+        - port
+        - region
+        - tv_port
+      computed_fields:
+        - is_dedicated
+      filter:
+        is_dedicated:
+          _eq: true
+      allow_aggregations: true
+    comment: ""
+  - role: match_organizer
+    permission:
+      columns:
+        - connected
+        - enabled
+        - host
+        - id
+        - label
+        - port
+        - region
+        - reserved_by_match_id
+        - tv_port
+      computed_fields:
+        - is_dedicated
+      filter:
+        is_dedicated:
+          _eq: true
+      allow_aggregations: true
+    comment: ""
+  - role: tournament_organizer
+    permission:
+      columns:
+        - connected
+        - enabled
+        - host
+        - id
+        - label
+        - port
+        - region
+        - reserved_by_match_id
+        - tv_port
+      computed_fields:
+        - is_dedicated
+      filter:
+        is_dedicated:
+          _eq: true
+      allow_aggregations: true
+    comment: ""
+update_permissions:
+  - role: administrator
+    permission:
+      columns:
+        - enabled
+        - host
+        - label
+        - port
+        - rcon_password
+        - region
+        - tv_port
+      filter:
+        is_dedicated:
+          _eq: true
+      check:
+        is_dedicated:
+          _eq: true
+    comment: ""
+delete_permissions:
+  - role: administrator
+    permission:
+      filter:
+        is_dedicated:
+          _eq: true
+    comment: ""
+event_triggers:
+  - name: server_availability
+    definition:
+      enable_manual: false
+      insert:
+        columns: '*'
+      update:
+        columns:
+          - reserved_by_match_id
+    retry_conf:
+      interval_sec: 10
+      num_retries: 0
+      timeout_sec: 60
+    webhook: '{{HASURA_GRAPHQL_EVENT_HOOK}}'

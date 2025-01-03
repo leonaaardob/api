@@ -1,0 +1,136 @@
+table:
+  name: match_lineups
+  schema: public
+object_relationships:
+  - name: captain
+    using:
+      manual_configuration:
+        column_mapping:
+          id: match_lineup_id
+        insertion_order: null
+        remote_table:
+          name: v_match_captains
+          schema: public
+  - name: coach
+    using:
+      manual_configuration:
+        column_mapping:
+          coach_steam_id: steam_id
+        insertion_order: null
+        remote_table:
+          name: players
+          schema: public
+  - name: team
+    using:
+      foreign_key_constraint_on: team_id
+  - name: v_match_lineup
+    using:
+      manual_configuration:
+        column_mapping:
+          id: id
+        insertion_order: null
+        remote_table:
+          name: v_match_lineups
+          schema: public
+array_relationships:
+  - name: lineup_players
+    using:
+      foreign_key_constraint_on:
+        column: match_lineup_id
+        table:
+          name: match_lineup_players
+          schema: public
+  - name: match_veto_picks
+    using:
+      foreign_key_constraint_on:
+        column: match_lineup_id
+        table:
+          name: match_map_veto_picks
+          schema: public
+computed_fields:
+  - name: can_pick_map_veto
+    definition:
+      function:
+        name: can_pick_map_veto
+        schema: public
+      session_argument: hasura_session
+  - name: can_pick_region_veto
+    definition:
+      function:
+        name: can_pick_region_veto
+        schema: public
+      session_argument: hasura_session
+  - name: can_update_lineup
+    definition:
+      function:
+        name: can_update_lineup
+        schema: public
+      session_argument: hasura_session
+  - name: is_on_lineup
+    definition:
+      function:
+        name: is_on_lineup
+        schema: public
+      session_argument: hasura_session
+  - name: is_picking_map_veto
+    definition:
+      function:
+        name: lineup_is_picking_map_veto
+        schema: public
+  - name: is_picking_region_veto
+    definition:
+      function:
+        name: lineup_is_picking_region_veto
+        schema: public
+  - name: is_ready
+    definition:
+      function:
+        name: is_match_lineup_ready
+        schema: public
+  - name: name
+    definition:
+      function:
+        name: get_team_name
+        schema: public
+insert_permissions:
+  - role: user
+    permission:
+      check: {}
+      columns:
+        - team_id
+    comment: ""
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - coach_steam_id
+        - id
+        - team_id
+      computed_fields:
+        - can_pick_map_veto
+        - can_pick_region_veto
+        - can_update_lineup
+        - is_on_lineup
+        - is_picking_map_veto
+        - is_picking_region_veto
+        - is_ready
+        - name
+      filter: {}
+      allow_aggregations: true
+    comment: ""
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - coach_steam_id
+      filter: {}
+      check:
+        _or:
+          - captain:
+              steam_id:
+                _eq: X-Hasura-User-Id
+          - v_match_lineup:
+              match:
+                organizer_steam_id:
+                  _eq: X-Hasura-User-Id
+    comment: ""

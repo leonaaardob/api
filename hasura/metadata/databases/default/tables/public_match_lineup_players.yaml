@@ -1,0 +1,143 @@
+table:
+  name: match_lineup_players
+  schema: public
+object_relationships:
+  - name: lineup
+    using:
+      foreign_key_constraint_on: match_lineup_id
+  - name: player
+    using:
+      foreign_key_constraint_on: steam_id
+insert_permissions:
+  - role: administrator
+    permission:
+      check: {}
+      columns:
+        - captain
+        - match_lineup_id
+        - steam_id
+    comment: ""
+  - role: match_organizer
+    permission:
+      check:
+        lineup:
+          v_match_lineup:
+            match:
+              is_tournament_match:
+                _eq: false
+      columns:
+        - captain
+        - match_lineup_id
+        - steam_id
+    comment: ""
+  - role: tournament_organizer
+    permission:
+      check: {}
+      columns: []
+    comment: ""
+  - role: user
+    permission:
+      check:
+        lineup:
+          v_match_lineup:
+            match:
+              organizer_steam_id:
+                _eq: X-Hasura-User-Id
+      columns:
+        - captain
+        - match_lineup_id
+        - steam_id
+    comment: ""
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - captain
+        - checked_in
+        - discord_id
+        - id
+        - match_lineup_id
+        - placeholder_name
+        - steam_id
+      filter: {}
+      allow_aggregations: true
+    comment: ""
+update_permissions:
+  - role: administrator
+    permission:
+      columns:
+        - captain
+        - match_lineup_id
+      filter: {}
+      check: null
+    comment: ""
+  - role: match_organizer
+    permission:
+      columns:
+        - captain
+        - match_lineup_id
+      filter:
+        lineup:
+          v_match_lineup:
+            match:
+              is_tournament_match:
+                _eq: false
+      check:
+        lineup:
+          v_match_lineup:
+            match:
+              is_tournament_match:
+                _eq: false
+    comment: ""
+  - role: tournament_organizer
+    permission:
+      columns: []
+      filter: {}
+      check: {}
+    comment: ""
+  - role: user
+    permission:
+      columns:
+        - captain
+        - match_lineup_id
+      filter:
+        lineup:
+          v_match_lineup:
+            match:
+              organizer_steam_id:
+                _eq: X-Hasura-User-Id
+      check:
+        lineup:
+          v_match_lineup:
+            match:
+              organizer_steam_id:
+                _eq: X-Hasura-User-Id
+    comment: ""
+delete_permissions:
+  - role: administrator
+    permission:
+      filter: {}
+    comment: ""
+  - role: match_organizer
+    permission:
+      filter:
+        lineup:
+          v_match_lineup:
+            match:
+              is_tournament_match:
+                _eq: false
+    comment: ""
+  - role: tournament_organizer
+    permission:
+      filter: {}
+      backend_only: true
+    comment: ""
+  - role: user
+    permission:
+      filter:
+        lineup:
+          v_match_lineup:
+            match:
+              organizer_steam_id:
+                _eq: X-Hasura-User-Id
+    comment: ""

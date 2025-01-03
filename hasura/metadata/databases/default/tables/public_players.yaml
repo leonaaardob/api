@@ -1,0 +1,313 @@
+table:
+  name: players
+  schema: public
+array_relationships:
+  - name: abandoned_matches
+    using:
+      foreign_key_constraint_on:
+        column: steam_id
+        table:
+          name: abandoned_matches
+          schema: public
+  - name: assists
+    using:
+      foreign_key_constraint_on:
+        column: attacker_steam_id
+        table:
+          name: player_assists
+          schema: public
+  - name: assited_by_players
+    using:
+      foreign_key_constraint_on:
+        column: attacked_steam_id
+        table:
+          name: player_assists
+          schema: public
+  - name: coach_lineups
+    using:
+      foreign_key_constraint_on:
+        column: coach_steam_id
+        table:
+          name: match_lineups
+          schema: public
+  - name: damage_dealt
+    using:
+      foreign_key_constraint_on:
+        column: attacker_steam_id
+        table:
+          name: player_damages
+          schema: public
+  - name: damage_taken
+    using:
+      foreign_key_constraint_on:
+        column: attacked_steam_id
+        table:
+          name: player_damages
+          schema: public
+  - name: deaths
+    using:
+      foreign_key_constraint_on:
+        column: attacked_steam_id
+        table:
+          name: player_kills
+          schema: public
+  - name: flashed_by_players
+    using:
+      foreign_key_constraint_on:
+        column: attacked_steam_id
+        table:
+          name: player_flashes
+          schema: public
+  - name: flashed_players
+    using:
+      foreign_key_constraint_on:
+        column: attacker_steam_id
+        table:
+          name: player_flashes
+          schema: public
+  - name: invited_players
+    using:
+      foreign_key_constraint_on:
+        column: invited_by_player_steam_id
+        table:
+          name: team_invites
+          schema: public
+  - name: kills
+    using:
+      foreign_key_constraint_on:
+        column: attacker_steam_id
+        table:
+          name: player_kills
+          schema: public
+  - name: multi_kills
+    using:
+      manual_configuration:
+        column_mapping:
+          steam_id: attacker_steam_id
+        insertion_order: null
+        remote_table:
+          name: v_player_multi_kills
+          schema: public
+  - name: notifications
+    using:
+      foreign_key_constraint_on:
+        column: steam_id
+        table:
+          name: notifications
+          schema: public
+  - name: objectives
+    using:
+      foreign_key_constraint_on:
+        column: player_steam_id
+        table:
+          name: player_objectives
+          schema: public
+  - name: owned_teams
+    using:
+      foreign_key_constraint_on:
+        column: owner_steam_id
+        table:
+          name: teams
+          schema: public
+  - name: player_lineup
+    using:
+      foreign_key_constraint_on:
+        column: steam_id
+        table:
+          name: match_lineup_players
+          schema: public
+  - name: player_unused_utilities
+    using:
+      foreign_key_constraint_on:
+        column: player_steam_id
+        table:
+          name: player_unused_utility
+          schema: public
+  - name: team_invites
+    using:
+      foreign_key_constraint_on:
+        column: steam_id
+        table:
+          name: team_invites
+          schema: public
+  - name: team_members
+    using:
+      foreign_key_constraint_on:
+        column: player_steam_id
+        table:
+          name: team_roster
+          schema: public
+  - name: tournament_organizers
+    using:
+      foreign_key_constraint_on:
+        column: steam_id
+        table:
+          name: tournament_organizers
+          schema: public
+  - name: tournament_rosters
+    using:
+      foreign_key_constraint_on:
+        column: player_steam_id
+        table:
+          name: tournament_team_roster
+          schema: public
+  - name: tournaments
+    using:
+      foreign_key_constraint_on:
+        column: organizer_steam_id
+        table:
+          name: tournaments
+          schema: public
+  - name: utility_thrown
+    using:
+      foreign_key_constraint_on:
+        column: attacker_steam_id
+        table:
+          name: player_utility
+          schema: public
+computed_fields:
+  - name: is_banned
+    definition:
+      function:
+        name: is_banned
+        schema: public
+  - name: is_gagged
+    definition:
+      function:
+        name: is_gagged
+        schema: public
+  - name: is_in_another_match
+    definition:
+      function:
+        name: is_in_another_match
+        schema: public
+  - name: is_muted
+    definition:
+      function:
+        name: is_muted
+        schema: public
+  - name: matches
+    definition:
+      function:
+        name: get_player_matches
+        schema: public
+  - name: matchmaking_cooldown
+    definition:
+      function:
+        name: get_player_matchmaking_cooldown
+        schema: public
+      session_argument: hasura_session
+  - name: teams
+    definition:
+      function:
+        name: get_player_teams
+        schema: public
+  - name: total_matches
+    definition:
+      function:
+        name: get_total_player_matches
+        schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - avatar_url
+        - country
+        - name
+        - name_registered
+        - profile_url
+        - role
+        - steam_id
+      computed_fields:
+        - is_banned
+        - is_gagged
+        - is_in_another_match
+        - is_muted
+        - matchmaking_cooldown
+        - total_matches
+      filter: {}
+      allow_aggregations: true
+    comment: ""
+update_permissions:
+  - role: administrator
+    permission:
+      columns:
+        - avatar_url
+        - country
+        - discord_id
+        - name
+        - profile_url
+        - role
+      filter: {}
+      check: null
+    comment: ""
+  - role: match_organizer
+    permission:
+      columns:
+        - avatar_url
+        - country
+        - discord_id
+        - name
+        - profile_url
+        - role
+      filter: {}
+      check: null
+    comment: ""
+  - role: tournament_organizer
+    permission:
+      columns:
+        - avatar_url
+        - country
+        - discord_id
+        - name
+        - profile_url
+        - role
+      filter: {}
+      check: null
+    comment: ""
+  - role: user
+    permission:
+      columns:
+        - country
+      filter:
+        steam_id:
+          _eq: X-Hasura-User-Id
+      check:
+        steam_id:
+          _eq: X-Hasura-User-Id
+    comment: ""
+delete_permissions:
+  - role: administrator
+    permission:
+      filter: {}
+    comment: ""
+  - role: match_organizer
+    permission:
+      filter: {}
+    comment: ""
+  - role: tournament_organizer
+    permission:
+      filter: {}
+    comment: ""
+event_triggers:
+  - name: player_events
+    definition:
+      delete:
+        columns: '*'
+      enable_manual: true
+      insert:
+        columns: '*'
+      update:
+        columns:
+          - steam_id
+          - name
+          - profile_url
+          - avatar_url
+          - discord_id
+          - role
+          - country
+    retry_conf:
+      interval_sec: 10
+      num_retries: 6
+      timeout_sec: 60
+    webhook: '{{HASURA_GRAPHQL_EVENT_HOOK}}'

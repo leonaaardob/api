@@ -1,0 +1,73 @@
+table:
+  name: match_region_veto_picks
+  schema: public
+object_relationships:
+  - name: match
+    using:
+      foreign_key_constraint_on: match_id
+  - name: match_lineup
+    using:
+      foreign_key_constraint_on: match_lineup_id
+insert_permissions:
+  - role: administrator
+    permission:
+      check: {}
+      columns:
+        - match_id
+        - match_lineup_id
+        - region
+        - type
+    comment: ""
+  - role: match_organizer
+    permission:
+      check:
+        match:
+          is_tournament_match:
+            _eq: false
+      columns:
+        - id
+        - match_id
+        - match_lineup_id
+        - region
+    comment: ""
+  - role: tournament_organizer
+    permission:
+      check:
+        match:
+          is_tournament_match:
+            _eq: true
+      columns:
+        - id
+        - match_id
+        - match_lineup_id
+        - region
+    comment: ""
+  - role: user
+    permission:
+      check:
+        _or:
+          - match_lineup:
+              captain:
+                steam_id:
+                  _eq: X-Hasura-User-Id
+          - match:
+              organizer_steam_id:
+                _eq: X-Hasura-User-Id
+      columns:
+        - match_id
+        - match_lineup_id
+        - region
+        - type
+    comment: ""
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - created_at
+        - id
+        - match_id
+        - match_lineup_id
+        - region
+        - type
+      filter: {}
+    comment: ""

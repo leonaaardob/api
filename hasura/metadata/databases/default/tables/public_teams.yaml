@@ -1,0 +1,128 @@
+table:
+  name: teams
+  schema: public
+object_relationships:
+  - name: owner
+    using:
+      foreign_key_constraint_on: owner_steam_id
+array_relationships:
+  - name: invites
+    using:
+      foreign_key_constraint_on:
+        column: team_id
+        table:
+          name: team_invites
+          schema: public
+  - name: match_lineups
+    using:
+      foreign_key_constraint_on:
+        column: team_id
+        table:
+          name: match_lineups
+          schema: public
+  - name: roster
+    using:
+      foreign_key_constraint_on:
+        column: team_id
+        table:
+          name: team_roster
+          schema: public
+  - name: tournament_teams
+    using:
+      foreign_key_constraint_on:
+        column: team_id
+        table:
+          name: tournament_teams
+          schema: public
+computed_fields:
+  - name: can_change_role
+    definition:
+      function:
+        name: can_change_team_role
+        schema: public
+      session_argument: hasura_session
+  - name: can_invite
+    definition:
+      function:
+        name: can_invite_to_team
+        schema: public
+      session_argument: hasura_session
+  - name: can_remove
+    definition:
+      function:
+        name: can_remove_from_team
+        schema: public
+      session_argument: hasura_session
+  - name: matches
+    definition:
+      function:
+        name: get_team_matches
+        schema: public
+insert_permissions:
+  - role: user
+    permission:
+      check: {}
+      set:
+        owner_steam_id: x-hasura-user-id
+      columns:
+        - name
+        - short_name
+    comment: ""
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - name
+        - owner_steam_id
+        - short_name
+      computed_fields:
+        - can_change_role
+        - can_invite
+        - can_remove
+      filter: {}
+      allow_aggregations: true
+    comment: ""
+update_permissions:
+  - role: administrator
+    permission:
+      columns:
+        - name
+        - owner_steam_id
+        - short_name
+      filter: {}
+      check: null
+      set:
+        owner_steam_id: x-hasura-user-id
+    comment: ""
+  - role: tournament_organizer
+    permission:
+      columns:
+        - name
+        - owner_steam_id
+        - short_name
+      filter: {}
+      check: null
+    comment: ""
+  - role: user
+    permission:
+      columns:
+        - name
+        - owner_steam_id
+        - short_name
+      filter:
+        owner_steam_id:
+          _eq: x-hasura-user-id
+      check: {}
+    comment: ""
+delete_permissions:
+  - role: administrator
+    permission:
+      filter: {}
+    comment: ""
+  - role: user
+    permission:
+      filter:
+        owner_steam_id:
+          _eq: x-hasura-user-id
+    comment: ""

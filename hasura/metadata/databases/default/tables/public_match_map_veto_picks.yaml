@@ -1,0 +1,136 @@
+table:
+  name: match_map_veto_picks
+  schema: public
+object_relationships:
+  - name: map
+    using:
+      foreign_key_constraint_on: map_id
+  - name: match
+    using:
+      foreign_key_constraint_on: match_id
+  - name: match_lineup
+    using:
+      foreign_key_constraint_on: match_lineup_id
+insert_permissions:
+  - role: administrator
+    permission:
+      check: {}
+      columns:
+        - map_id
+        - match_id
+        - match_lineup_id
+        - side
+        - type
+    comment: ""
+  - role: match_organizer
+    permission:
+      check:
+        _and:
+          - _or:
+              - _or:
+                  - match_lineup:
+                      captain:
+                        steam_id:
+                          _eq: X-Hasura-User-Id
+                  - match:
+                      organizer_steam_id:
+                        _eq: X-Hasura-User-Id
+              - match:
+                  is_tournament_match:
+                    _eq: false
+      columns:
+        - map_id
+        - match_id
+        - match_lineup_id
+        - side
+        - type
+    comment: ""
+  - role: tournament_organizer
+    permission:
+      check:
+        _or:
+          - match_lineup:
+              captain:
+                steam_id:
+                  _eq: X-Hasura-User-Id
+          - match:
+              organizer_steam_id:
+                _eq: X-Hasura-User-Id
+          - match:
+              is_tournament_match:
+                _eq: true
+      columns:
+        - map_id
+        - match_id
+        - match_lineup_id
+        - side
+        - type
+    comment: ""
+  - role: user
+    permission:
+      check:
+        match_lineup:
+          captain:
+            steam_id:
+              _eq: X-Hasura-User-Id
+      columns:
+        - map_id
+        - match_id
+        - match_lineup_id
+        - side
+        - type
+    comment: ""
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - created_at
+        - id
+        - map_id
+        - match_id
+        - match_lineup_id
+        - side
+        - type
+      filter: {}
+    comment: ""
+delete_permissions:
+  - role: administrator
+    permission:
+      filter: {}
+    comment: ""
+  - role: match_organizer
+    permission:
+      filter:
+        match:
+          is_tournament_match:
+            _eq: false
+    comment: ""
+  - role: tournament_organizer
+    permission:
+      filter:
+        match:
+          is_tournament_match:
+            _eq: true
+    comment: ""
+  - role: user
+    permission:
+      filter:
+        match:
+          organizer_steam_id:
+            _eq: X-Hasura-User-Id
+    comment: ""
+event_triggers:
+  - name: match_veto_pick
+    definition:
+      delete:
+        columns: '*'
+      enable_manual: true
+      insert:
+        columns: '*'
+      update:
+        columns: '*'
+    retry_conf:
+      interval_sec: 10
+      num_retries: 0
+      timeout_sec: 60
+    webhook: '{{HASURA_GRAPHQL_EVENT_HOOK}}'
