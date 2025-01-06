@@ -57,7 +57,7 @@ export class GameServerNodeService {
         insert_server_regions_one: {
           __args: {
             object: {
-              name: "LAN",
+              value: "LAN",
               description: "LAN",
               is_lan: true,
             },
