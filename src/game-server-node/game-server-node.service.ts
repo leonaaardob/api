@@ -50,7 +50,7 @@ export class GameServerNodeService {
       },
     });
 
-    let lanRegion = regions.server_regions.at(0).value;
+    let lanRegion = regions.server_regions.at(0)?.value;
 
     if (!lanRegion) {
       const createdLanRegion = await this.hasura.mutation({
