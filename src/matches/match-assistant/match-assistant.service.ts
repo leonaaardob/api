@@ -944,6 +944,10 @@ export class MatchAssistantService {
   ) {
     let map_pool_id;
 
+    if(!options.maps) {
+      options.maps = [];
+    }
+
     if (options.map) {
       options.maps = [options.map];
     }
@@ -984,7 +988,7 @@ export class MatchAssistantService {
                         data: {
                           type: "Custom",
                           maps: {
-                            data: options.maps?.map((map_id) => {
+                            data: options.maps.map((map_id) => {
                               return {
                                 id: map_id,
                               };
