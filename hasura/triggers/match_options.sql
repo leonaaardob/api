@@ -19,16 +19,20 @@ region_count int;
 BEGIN
     SELECT COUNT(DISTINCT region) INTO region_count
         FROM servers;
-        -- WHERE region != 'Lan';
 
     IF region_count = 1 THEN
         NEW.region_veto = false;
     END IF;
 
+    IF NEW.regions IS NOT NULL THEN
+        SELECT count(*) INTO lan_count 
+        FROM server_regions 
+        WHERE value = ANY(NEW.regions) AND is_lan = true;
 
-    IF 'Lan' = ANY(NEW.regions) THEN
-        IF (current_setting('hasura.user', true)::jsonb ->> 'x-hasura-role')::text = 'user' THEN
-            RAISE EXCEPTION 'Cannot assign the Lan region' USING ERRCODE = '22000';
+        IF lan_count > 0 THEN
+            IF (current_setting('hasura.user', true)::jsonb ->> 'x-hasura-role')::text = 'user' THEN
+                RAISE EXCEPTION 'Cannot assign the Lan region' USING ERRCODE = '22000';
+            END IF;
         END IF;
     END IF;
 
@@ -46,7 +50,6 @@ BEGIN
 	RETURN NEW;
 END;
 $$;
-
 
 DROP TRIGGER IF EXISTS tbi_match_options ON public.match_options;
 CREATE TRIGGER tbi_match_options BEFORE INSERT ON public.match_options FOR EACH ROW EXECUTE FUNCTION public.tbi_match_options();

@@ -6,12 +6,18 @@ DECLARE
   lineup_id uuid;
   has_map_veto BOOLEAN;
   available_regions text[];
+  regions text[];
 BEGIN
-    select array_agg(sr.value) INTO available_regions from server_regions sr
-        INNER JOIN game_server_nodes gsn on gsn.region = sr.value and gsn.enabled = true
-        LEFT JOIN match_region_veto_picks mvp on mvp.region = sr.value and mvp.match_id = match_region_veto_pick.match_id
-        where mvp.region is null
-        and sr.is_lan = false;
+    select * into regions from match_options where id = match_region_veto_pick.match_id;
+
+    IF (regions IS NULL OR array_length(regions, 1) = 0) THEN
+        SELECT array_agg(sr.value) INTO available_regions 
+        FROM server_regions sr
+        INNER JOIN game_server_nodes gsn ON gsn.region = sr.value AND gsn.enabled = true
+        LEFT JOIN match_region_veto_picks mvp ON mvp.region = sr.value AND mvp.match_id = match_region_veto_pick.match_id
+        WHERE mvp.region IS NULL
+        AND sr.is_lan = false;
+    END IF;
 
   IF array_length(available_regions, 1) = 1 THEN
     SELECT * INTO _match FROM matches WHERE id = match_region_veto_pick.match_id LIMIT 1;
