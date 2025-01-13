@@ -1,0 +1,4 @@
+-- Could not auto-generate a down migration.
+-- Please write an appropriate down migration for the SQL below:
+-- DROP TRIGGER IF EXISTS tbiu_player_damages ON public.player_damages;
+-- DROP FUNCTION IF EXISTS public.tbiu_player_damages();
