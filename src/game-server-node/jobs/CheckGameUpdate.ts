@@ -4,6 +4,7 @@ import { UseQueue } from "../../utilities/QueueProcessors";
 import { GameServerQueues } from "../enums/GameServerQueues";
 import { Logger } from "@nestjs/common";
 import { GameServerNodeService } from "../game-server-node.service";
+import { HasuraService } from "src/hasura/hasura.service";
 
 @UseQueue("GameServerNode", GameServerQueues.GameUpdate)
 export class CheckGameUpdate extends WorkerHost {
@@ -11,6 +12,7 @@ export class CheckGameUpdate extends WorkerHost {
     protected readonly cache: CacheService,
     protected readonly logger: Logger,
     protected readonly gameServerNodeService: GameServerNodeService,
+    protected readonly hasuraService: HasuraService,
   ) {
     super();
   }
@@ -26,6 +28,22 @@ export class CheckGameUpdate extends WorkerHost {
     if (!publicBuild) {
       return;
     }
+
+    await this.hasuraService.mutation({
+      insert_settings_one: {
+        __args: {
+          object: {
+            name: "cs_version",
+            value: JSON.stringify(publicBuild),
+          },
+          on_conflict: {
+            constraint: "settings_pkey",
+            update_columns: ["value"],
+          },
+        },
+        __typename: true,
+      },
+    });
 
     if (
       !latestBuildTime ||
