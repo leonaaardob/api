@@ -152,6 +152,8 @@ export class SocketsGateway {
           );
 
           if (clients.length === 0) {
+            this.matchMaking.leaveQueue(client);
+
             await this.redis.del(
               SocketsGateway.GET_PLAYER_KEY(client.user.steam_id),
             );
