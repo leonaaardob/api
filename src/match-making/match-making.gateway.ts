@@ -179,7 +179,7 @@ export class MatchMakingGateway {
   private async removeUserFromRegions(steamId: string) {
     const userQueueDetails = await this.getUserQueueDetails(steamId);
 
-    if (!userQueueDetails) {
+    if (!userQueueDetails?.type) {
       return;
     }
 
