@@ -206,6 +206,10 @@ export class MatchMakingGateway {
 
     const userQueueDetails = await this.getUserQueueDetails(user.steam_id);
 
+    if (!userQueueDetails) {
+      return;
+    }
+
     const type = userQueueDetails.type;
 
     await this.removeUserFromQueue(user.steam_id);
