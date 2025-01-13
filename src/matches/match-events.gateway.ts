@@ -94,8 +94,6 @@ export class MatchEventsGateway {
 
     await processor.process();
 
-    return {
-      messageId,
-    };
+    return messageId;
   }
 }
