@@ -69,6 +69,7 @@ export class MatchEventsGateway {
     @MessageBody()
     message: {
       matchId: string;
+      messageId: string;
       data: {
         event: string;
         data: Record<string, unknown>;
@@ -76,7 +77,7 @@ export class MatchEventsGateway {
     },
     @ConnectedSocket() client: WebSocket.WebSocket,
   ) {
-    const { matchId } = message;
+    const { matchId, messageId } = message;
     const { data, event } = message.data;
 
     const Processor = MatchEvents[event as keyof typeof MatchEvents];
@@ -92,5 +93,9 @@ export class MatchEventsGateway {
     processor.setData(matchId, data);
 
     await processor.process();
+
+    return {
+      messageId,
+    };
   }
 }

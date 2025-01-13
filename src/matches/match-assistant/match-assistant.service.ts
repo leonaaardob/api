@@ -944,7 +944,7 @@ export class MatchAssistantService {
   ) {
     let map_pool_id;
 
-    if(!options.maps) {
+    if (!options.maps) {
       options.maps = [];
     }
 
