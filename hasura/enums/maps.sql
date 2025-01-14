@@ -11,9 +11,9 @@ insert into maps ("name", "type", "active_pool", "workshop_map_id", "poster", "p
     ('de_mirage', 'Competitive', 'true',  null, '/img/maps/screenshots/de_mirage.webp', '/img/maps/icons/de_mirage.svg'),
     ('de_nuke', 'Competitive', 'true',  null, '/img/maps/screenshots/de_nuke.webp', '/img/maps/icons/de_nuke.svg'),
     ('de_overpass', 'Competitive', 'false',  null, '/img/maps/screenshots/de_overpass.webp', '/img/maps/icons/de_overpass.svg'),
-    ('de_vertigo', 'Competitive', 'true',  null, '/img/maps/screenshots/de_vertigo.webp', '/img/maps/icons/de_vertigo.svg'),
+    ('de_vertigo', 'Competitive', 'false',  null, '/img/maps/screenshots/de_vertigo.webp', '/img/maps/icons/de_vertigo.svg'),
     ('de_dust2', 'Competitive', 'true',  null, '/img/maps/screenshots/de_dust2.webp', '/img/maps/icons/de_dust2.svg'),
-    ('de_train', 'Competitive', 'false',  null, '/img/maps/screenshots/de_train.webp', '/img/maps/icons/de_train.svg'),
+    ('de_train', 'Competitive', 'true',  null, '/img/maps/screenshots/de_train.webp', '/img/maps/icons/de_train.svg'),
 
     -- Workshop Competitive
     ('de_cache', 'Competitive', 'false',  '3070596702', '/img/maps/screenshots/de_cache.webp', '/img/maps/icons/de_cache.svg'),
