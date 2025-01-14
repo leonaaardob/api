@@ -18,15 +18,7 @@ lan_count int;
 region_count int;
 BEGIN
     SELECT COUNT(DISTINCT region) INTO region_count
-        FROM servers;
-
-    IF region_count = 1 THEN
-        NEW.region_veto = false;
-    END IF;
-
-    IF NEW.region_veto = false AND (NEW.regions IS NULL OR NEW.regions = '{}') THEN
-        RAISE EXCEPTION 'Region veto is disabled but no regions are selected' USING ERRCODE = '22000';
-    END IF;
+        FROM servers where enabled = true;
 
     IF NEW.regions IS NOT NULL THEN
         SELECT count(*) INTO lan_count 
@@ -38,6 +30,15 @@ BEGIN
                 RAISE EXCEPTION 'Cannot assign the Lan region' USING ERRCODE = '22000';
             END IF;
         END IF;
+    END IF;
+
+    IF region_count = 1 THEN
+        NEW.region_veto = false;
+        NEW.regions = (SELECT array_agg(region) FROM servers where enabled = true);
+    END IF;
+
+    IF NEW.region_veto = false AND (NEW.regions IS NULL OR NEW.regions = '{}') THEN
+        RAISE EXCEPTION 'Region veto is disabled but no regions are selected' USING ERRCODE = '22000';
     END IF;
 
     IF EXISTS (SELECT 1 FROM tournaments WHERE match_options_id = NEW.id) AND NEW.lobby_access != 'Private' THEN 
