@@ -5,14 +5,14 @@ import { RedisManagerService } from "../redis/redis-manager/redis-manager.servic
 import { HasuraService } from "../hasura/hasura.service";
 import { RconService } from "../rcon/rcon.service";
 import { FiveStackWebSocketClient } from "src/sockets/types/FiveStackWebSocketClient";
-
+import { ChatLobbyType } from "./enums/ChatLobbyTypes";
 @Injectable()
-export class MatchLobbyService {
+export class ChatService {
   private redis: Redis;
   /**
    * TODO - put into redis ratehr than here because it wont scale
    */
-  private matches: Record<
+  private lobbies: Record<
     string,
     Map<
       string,
@@ -35,56 +35,65 @@ export class MatchLobbyService {
 
   public async joinMatchLobby(
     client: FiveStackWebSocketClient,
-    matchId: string,
+    type: ChatLobbyType,
+    id: string,
   ) {
-    const { matches_by_pk } = await this.hasuraService.query(
-      {
-        matches_by_pk: {
-          __args: {
-            id: matchId,
+    switch (type) {
+      case ChatLobbyType.Match:
+        const { matches_by_pk } = await this.hasuraService.query(
+          {
+            matches_by_pk: {
+              __args: {
+                id,
+              },
+              is_coach: true,
+              is_organizer: true,
+              is_in_lineup: true,
+            },
           },
-          is_coach: true,
-          is_organizer: true,
-          is_in_lineup: true,
-        },
-      },
-      client.user,
-    );
+          client.user,
+        );
 
-    if (!matches_by_pk) {
-      return;
+        if (!matches_by_pk) {
+          return;
+        }
+        if (
+          matches_by_pk.is_coach === false &&
+          matches_by_pk.is_in_lineup === false &&
+          matches_by_pk.is_organizer === false
+        ) {
+          return;
+        }
+
+        const userData = this.addUserToMatch(id, client.user, false);
+
+        if (userData.sessions.length === 0) {
+          this.to(ChatLobbyType.Match, id, "joined", {
+            user: {
+              ...userData.user,
+              inGame: userData.inGame,
+            },
+          });
+        }
+
+        if (userData.sessions.includes(client)) {
+          return;
+        }
+
+        userData.sessions.push(client);
+        break;
+      default:
+        console.warn(`Unknown lobby type: ${type}`);
+        return;
+        break;
     }
-    if (
-      matches_by_pk.is_coach === false &&
-      matches_by_pk.is_in_lineup === false &&
-      matches_by_pk.is_organizer === false
-    ) {
-      return;
-    }
-
-    const userData = this.addUserToMatch(matchId, client.user, false);
-
-    if (userData.sessions.length === 0) {
-      this.to(matchId, "lobby:joined", {
-        user: {
-          ...userData.user,
-          inGame: userData.inGame,
-        },
-      });
-    }
-
-    if (userData.sessions.includes(client)) {
-      return;
-    }
-
-    userData.sessions.push(client);
 
     client.send(
       JSON.stringify({
-        event: "lobby:list",
+        event: `lobby:${type}:list`,
         data: {
-          matchId: matchId,
-          lobby: Array.from(this.matches[matchId].values()).map(
+          id,
+          lobby: Array.from(this.lobbies[id].values()).map(
             ({ user, inGame }) => {
               return {
                 inGame,
@@ -96,7 +105,7 @@ export class MatchLobbyService {
       }),
     );
 
-    const messagesObject = await this.redis.hgetall(`chat_${matchId}`);
+    const messagesObject = await this.redis.hgetall(`chat_${type}_${id}`);
 
     const messages = Object.entries(messagesObject).map(([, value]) =>
       JSON.parse(value),
@@ -104,31 +113,32 @@ export class MatchLobbyService {
 
     client.send(
       JSON.stringify({
-        event: "lobby:messages",
+        event: `lobby:${type}:messages`,
         data: {
+          id,
           messages: messages.sort((a, b) => {
             return (
               new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
             );
           }),
-          matchId: matchId,
         },
       }),
     );
 
     client.on("close", () => {
-      this.removeFromLobby(matchId, client);
+      this.removeFromLobby(type, id, client);
     });
   }
 
   public async sendMessageToChat(
+    type: ChatLobbyType,
+    id: string,
     player: User,
-    matchId: string,
     _message: string,
     skipCheck = false,
   ) {
     // verify they are in the lobby
-    if (skipCheck === false && !this.matches[matchId]?.get(player.steam_id)) {
+    if (skipCheck === false && !this.lobbies[id]?.get(player.steam_id)) {
       return;
     }
 
@@ -147,7 +157,7 @@ export class MatchLobbyService {
       },
     };
 
-    const messageKey = `chat_${matchId}`;
+    const messageKey = `chat_${type}_${id}`;
     const messageField = `${player.steam_id}:${Date.now().toString()}`;
     await this.redis.hset(messageKey, messageField, JSON.stringify(message));
 
@@ -161,21 +171,18 @@ export class MatchLobbyService {
       ]),
     );
 
-    this.to(matchId, "lobby:chat", message);
+    this.to(type, id, "chat", message);
   }
 
   public to(
-    matchId: string,
-    event:
-      | "lobby:chat"
-      | "lobby:list"
-      | "lobby:messages"
-      | "lobby:joined"
-      | "lobby:left",
+    type: ChatLobbyType,
+    id: string,
+    event: "chat" | "list" | "messages" | "joined" | "left",
     data: Record<string, any>,
     sender?: FiveStackWebSocketClient,
   ) {
-    const clients = this.matches?.[matchId];
+    // TODO - genericize this
+    const clients = this.lobbies?.[id];
 
     if (!clients) {
       return;
@@ -189,9 +196,9 @@ export class MatchLobbyService {
 
         session.send(
           JSON.stringify({
-            event,
+            event: `lobby:${type}:${event}`,
             data: {
-              matchId,
+              id,
               ...data,
             },
           }),
@@ -200,8 +207,12 @@ export class MatchLobbyService {
     }
   }
 
-  public removeFromLobby(matchId: string, client: FiveStackWebSocketClient) {
-    const userData = this.matches[matchId]?.get(client.user.steam_id);
+  public removeFromLobby(
+    type: ChatLobbyType,
+    id: string,
+    client: FiveStackWebSocketClient,
+  ) {
+    const userData = this.lobbies[id]?.get(client.user.steam_id);
 
     if (!userData) {
       return;
@@ -214,7 +225,7 @@ export class MatchLobbyService {
       : [];
 
     if (userData.inGame) {
-      this.to(matchId, "lobby:joined", {
+      this.to(type, id, "joined", {
         user: {
           ...userData.user,
           inGame: userData.inGame,
@@ -225,8 +236,8 @@ export class MatchLobbyService {
     }
 
     if (userData.sessions.length === 0) {
-      this.matches[matchId].delete(client.user.steam_id);
-      this.to(matchId, "lobby:left", {
+      this.lobbies[id].delete(client.user.steam_id);
+      this.to(type, id, "left", {
         user: {
           steam_id: client.user.steam_id,
         },
@@ -248,7 +259,8 @@ export class MatchLobbyService {
         },
       });
 
-      const server = matches_by_pk.server;
+      const server = matches_by_pk?.server;
+
       if (!server) {
         return;
       }
@@ -284,7 +296,7 @@ export class MatchLobbyService {
 
     const userData = this.addUserToMatch(matchId, player, true);
 
-    this.to(matchId, "lobby:joined", {
+    this.to(ChatLobbyType.Match, matchId, "joined", {
       user: {
         ...userData.user,
         inGame: userData.inGame,
@@ -293,14 +305,14 @@ export class MatchLobbyService {
   }
 
   public async leaveLobbyViaGame(matchId: string, steamId: string) {
-    const userData = this.matches[matchId].get(steamId);
+    const userData = this.lobbies[matchId].get(steamId);
 
     if (userData) {
       userData.inGame = false;
     }
 
     if (userData.sessions.length > 0) {
-      this.to(matchId, "lobby:joined", {
+      this.to(ChatLobbyType.Match, matchId, "joined", {
         user: {
           ...userData.user,
           inGame: userData.inGame,
@@ -309,9 +321,9 @@ export class MatchLobbyService {
       return;
     }
 
-    this.matches[matchId].delete(steamId);
+    this.lobbies[matchId].delete(steamId);
 
-    this.to(matchId, "lobby:left", {
+    this.to(ChatLobbyType.Match, matchId, "left", {
       user: {
         steam_id: steamId,
       },
@@ -319,18 +331,18 @@ export class MatchLobbyService {
   }
 
   private addUserToMatch(matchId: string, user: User, game: boolean) {
-    if (!this.matches[matchId]) {
-      this.matches[matchId] = new Map();
+    if (!this.lobbies[matchId]) {
+      this.lobbies[matchId] = new Map();
     }
 
-    let userData = this.matches[matchId].get(user.steam_id);
+    let userData = this.lobbies[matchId].get(user.steam_id);
 
     if (!userData) {
       userData = {
         user,
         sessions: [],
       };
-      this.matches[matchId].set(user.steam_id, userData);
+      this.lobbies[matchId].set(user.steam_id, userData);
     }
 
     if (game) {

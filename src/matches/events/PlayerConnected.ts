@@ -20,6 +20,6 @@ export default class PlayerConnected extends MatchEventProcessor<{
         __typename: true,
       },
     });
-    await this.matchLobby.joinLobbyViaGame(this.matchId, this.data.steam_id);
+    await this.chat.joinLobbyViaGame(this.matchId, this.data.steam_id);
   }
 }

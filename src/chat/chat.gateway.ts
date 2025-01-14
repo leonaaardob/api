@@ -4,20 +4,22 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from "@nestjs/websockets";
-import { MatchLobbyService } from "../matches/match-lobby.service";
+import { ChatService } from "./chat.service";
 import { FiveStackWebSocketClient } from "src/sockets/types/FiveStackWebSocketClient";
+import { ChatLobbyType } from "./enums/ChatLobbyTypes";
 
 @WebSocketGateway({
   path: "/ws/web",
 })
-export class MatchLobbyGateway {
-  constructor(private readonly matchLobby: MatchLobbyService) {}
+export class ChatGateway {
+  constructor(private readonly chat: ChatService) {}
 
   @SubscribeMessage("lobby:join")
   async joinLobby(
     @MessageBody()
     data: {
-      matchId: string;
+      id: string;
+      type: ChatLobbyType;
     },
     @ConnectedSocket() client: FiveStackWebSocketClient,
   ) {
@@ -25,14 +27,15 @@ export class MatchLobbyGateway {
       return;
     }
 
-    await this.matchLobby.joinMatchLobby(client, data.matchId);
+    await this.chat.joinMatchLobby(client, data.type, data.id);
   }
 
   @SubscribeMessage("lobby:leave")
   async leaveLobby(
     @MessageBody()
     data: {
-      matchId: string;
+      id: string;
+      type: ChatLobbyType;
     },
     @ConnectedSocket() client: FiveStackWebSocketClient,
   ) {
@@ -40,15 +43,16 @@ export class MatchLobbyGateway {
       return;
     }
 
-    this.matchLobby.removeFromLobby(data.matchId, client);
+    this.chat.removeFromLobby(data.type, data.id, client);
   }
 
   @SubscribeMessage("lobby:chat")
   async lobby(
     @MessageBody()
     data: {
-      matchId: string;
+      id: string;
       message: string;
+      type: ChatLobbyType;
     },
     @ConnectedSocket() client: FiveStackWebSocketClient,
   ) {
@@ -62,13 +66,19 @@ export class MatchLobbyGateway {
       return;
     }
 
-    await this.matchLobby.sendMessageToChat(
+    await this.chat.sendMessageToChat(
+      data.type,
+      data.id,
       client.user,
-      data.matchId,
       data.message,
     );
-    await this.matchLobby.sendChatToServer(
-      data.matchId,
+
+    if (data.type !== ChatLobbyType.Match) {
+      return;
+    }
+
+    await this.chat.sendChatToServer(
+      data.id,
       `${client.user.role ? `[${client.user.role}] ` : ""}${client.user.name}: ${data.message}`.replaceAll(
         `"`,
         `'`,

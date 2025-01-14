@@ -1,5 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { MatchLobbyService } from "../matches/match-lobby.service";
+import { MatchLobbyService } from "../chat/chat.service";
 
 describe("SocketsService", () => {
   let service: MatchLobbyService;

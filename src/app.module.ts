@@ -29,6 +29,7 @@ import { GameServerNodeModule } from "./game-server-node/game-server-node.module
 import { MatchMakingModule } from "./match-making/match-making.module";
 import { SystemModule } from "./system/system.module";
 import { NotificationsModule } from "./notifications/notifications.module";
+import { ChatModule } from "./chat/chat.module";
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { NotificationsModule } from "./notifications/notifications.module";
     GameServerNodeModule,
     SystemModule,
     NotificationsModule,
+    ChatModule,
   ],
   providers: [loggerFactory()],
   controllers: [AppController, QuickConnectController],

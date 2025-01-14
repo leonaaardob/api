@@ -1,3 +1,4 @@
+import { ChatLobbyType } from "src/chat/enums/ChatLobbyTypes";
 import MatchEventProcessor from "./abstracts/MatchEventProcessor";
 
 export default class ChatMessageEvent extends MatchEventProcessor<{
@@ -24,9 +25,10 @@ export default class ChatMessageEvent extends MatchEventProcessor<{
       return;
     }
 
-    await this.matchLobby.sendMessageToChat(
-      players_by_pk,
+    await this.chat.sendMessageToChat(
+      ChatLobbyType.Match,
       this.matchId,
+      players_by_pk,
       this.data.message,
       true,
     );

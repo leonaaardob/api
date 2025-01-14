@@ -37,12 +37,12 @@ import { CancelInvalidTournaments } from "./jobs/CancelInvalidTournaments";
 import { SocketsModule } from "../sockets/sockets.module";
 import { CancelMatchMaking } from "./jobs/CancelMatchMaking";
 import { CleanAbandonedMatches } from "./jobs/CleanAbandonedMatches";
-import { MatchLobbyService } from "./match-lobby.service";
 import { MatchMakingModule } from "src/match-making/match-making.module";
 import { MatchEventsGateway } from "./match-events.gateway";
-import { MatchLobbyGateway } from "./match-lobby.gateway";
 import { PostgresModule } from "src/postgres/postgres.module";
 import { NotificationsModule } from "../notifications/notifications.module";
+import { ChatModule } from "src/chat/chat.module";
+
 @Module({
   imports: [
     HasuraModule,
@@ -56,6 +56,7 @@ import { NotificationsModule } from "../notifications/notifications.module";
     NotificationsModule,
     forwardRef(() => DiscordBotModule),
     MatchMakingModule,
+    ChatModule,
     BullModule.registerQueue(
       {
         name: MatchQueues.MatchServers,
@@ -76,12 +77,10 @@ import { NotificationsModule } from "../notifications/notifications.module";
     ),
   ],
   controllers: [MatchesController, DemosController, BackupRoundsController],
-  exports: [MatchAssistantService, MatchLobbyService],
+  exports: [MatchAssistantService],
   providers: [
-    MatchLobbyGateway,
     MatchEventsGateway,
     MatchAssistantService,
-    MatchLobbyService,
     CheckOnDemandServerJob,
     CheckOnDemandServerJobEvents,
     CancelExpiredMatches,
