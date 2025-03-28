@@ -13,8 +13,9 @@ import { RedisManagerService } from "src/redis/redis-manager/redis-manager.servi
 import { AppConfig } from "src/configs/types/AppConfig";
 import { Redis } from "ioredis";
 import { ConfigService } from "@nestjs/config";
-import { MatchMakingGateway } from "../match-making/match-making.gateway";
 import { FiveStackWebSocketClient } from "./types/FiveStackWebSocketClient";
+import { MatchmakeService } from "src/matchmaking/matchmake.service";
+import { MatchmakingLobbyService } from "src/matchmaking/matchmaking-lobby.service";
 
 @WebSocketGateway({
   path: "/ws/web",
@@ -55,8 +56,9 @@ export class SocketsGateway {
 
   constructor(
     private readonly config: ConfigService,
-    private readonly matchMaking: MatchMakingGateway,
+    private readonly matchmaking: MatchmakeService,
     private readonly redisManager: RedisManagerService,
+    private readonly matchmakingLobbyService: MatchmakingLobbyService,
   ) {
     this.redis = this.redisManager.getConnection();
     this.appConfig = this.config.get<AppConfig>("app");
@@ -135,8 +137,10 @@ export class SocketsGateway {
         await this.updateClient(client.user.steam_id, client.id);
 
         await this.sendPeopleOnline();
-        await this.matchMaking.sendRegionStats(client.user);
-        await this.matchMaking.sendQueueDetailsToUser(client.user.steam_id);
+        await this.matchmaking.sendRegionStats(client.user);
+        await this.matchmakingLobbyService.sendQueueDetailsToPlayer(
+          client.user,
+        );
 
         client.on("close", async () => {
           await this.redis.del(
@@ -152,12 +156,30 @@ export class SocketsGateway {
           );
 
           if (clients.length === 0) {
-            this.matchMaking.leaveQueue(client);
-
             await this.redis.del(
               SocketsGateway.GET_PLAYER_KEY(client.user.steam_id),
             );
+
             await this.sendPeopleOnline();
+
+            // GIVE THEM A DELAY
+            // this.matchMaking.leaveQueue(client);
+
+            // await this.hasura.mutation({
+            //   delete_lobby_players: {
+            //     __args: {
+            //       where: {
+            //         steam_id: {
+            //           _eq: client.user.steam_id,
+            //         },
+            //         status: {
+            //           _eq: "Accepted",
+            //         },
+            //       },
+            //     },
+            //     __typename: true,
+            //   },
+            // });
           }
         });
       });
