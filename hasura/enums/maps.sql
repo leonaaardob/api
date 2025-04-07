@@ -27,8 +27,8 @@ insert into maps ("name", "type", "active_pool", "workshop_map_id", "poster", "p
     ('de_prodigy', 'Competitive', 'false',  '3195849330', '/img/maps/screenshots/de_prodigy.webp', null),
     ('de_thera', 'Competitive', 'false',  '3121217565', '/img/maps/screenshots/de_thera.webp', '/img/maps/icons/de_thera.svg'),
     ('de_mills', 'Competitive', 'false',  '3152430710', '/img/maps/screenshots/de_mills.webp', '/img/maps/icons/de_mills.svg'),    
-    ('de_edin', 'Competitive', 'false',  null, '/img/maps/screenshots/de_edin.webp', '/img/maps/icons/de_edin.svg'),
-    ('de_basalt', 'Competitive', 'false',  '3152430710', '/img/maps/screenshots/de_basalt.webp', '/img/maps/icons/de_basalt.svg'),
+    ('de_edin', 'Competitive', 'true',  null, '/img/maps/screenshots/de_edin.webp', '/img/maps/icons/de_edin.svg'),
+    ('de_basalt', 'Competitive', 'true',  null, '/img/maps/screenshots/de_basalt.webp', '/img/maps/icons/de_basalt.svg'),
 
     -- Night Maps
     ('de_dust2_night', 'Competitive', 'false', '3296013569', '/img/maps/screenshots/de_dust2_night.webp', null),
