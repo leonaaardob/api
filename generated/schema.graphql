@@ -1116,7 +1116,7 @@ enum e_lobby_access_enum {
   """Invite Only"""
   Invite
 
-  """Open"""
+  """Public"""
   Open
 
   """Private"""
@@ -1473,6 +1473,9 @@ enum e_map_pool_types_enum {
 
   """Custom match"""
   Custom
+
+  """1 vs 1 match"""
+  Duel
 
   """2 vs 2 match"""
   Wingman
@@ -2179,6 +2182,9 @@ enum e_match_types_constraint {
 enum e_match_types_enum {
   """5 vs 5 match using active map pool"""
   Competitive
+
+  """1 vs 1 match"""
+  Duel
 
   """2 vs 2 match"""
   Wingman
