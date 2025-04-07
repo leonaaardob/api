@@ -76,10 +76,10 @@ insert into maps ("name", "type", "active_pool", "workshop_map_id", "poster", "p
 on conflict(name, type) do update set "active_pool" = EXCLUDED."active_pool", "workshop_map_id" = EXCLUDED."workshop_map_id", "poster" = EXCLUDED."poster", "patch" = EXCLUDED."patch";
 
 insert into e_map_pool_types ("value", "description") values
-    ('Competitive', '5 vs 5 match using active map pool'),
-    ('Wingman', '2 vs 2 match'),
-    ('Duel', '1 vs 1 match'),
-    ('Custom', 'Custom match')
+    ('Competitive', '5 vs 5'),
+    ('Wingman', '2 vs 2'),
+    ('Duel', '1 vs 1'),
+    ('Custom', 'Custom')
 on conflict(value) do update set "description" = EXCLUDED."description";
 
 WITH new_rows AS (
