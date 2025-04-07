@@ -44,8 +44,8 @@ insert into maps ("name", "type", "active_pool", "workshop_map_id", "poster", "p
     ('de_vertigo', 'Wingman', 'true',  null, '/img/maps/screenshots/de_vertigo.webp', '/img/maps/icons/de_vertigo.svg'),
     ('de_assembly', 'Wingman', 'false',  '3071005299', '/img/maps/screenshots/de_assembly.webp', '/img/maps/icons/de_assembly.svg'),
     ('de_memento', 'Wingman', 'false',  '3165559377', '/img/maps/screenshots/de_memento.webp', '/img/maps/icons/de_memento.svg'),
-    ('de_palais', 'Wingman', 'true',  null, '/img/maps/screenshots/de_palais.webp', '/img/maps/icons/de_palais.svg'),
-    ('de_whistle', 'Wingman', 'true',  null, '/img/maps/screenshots/de_whistle.webp', '/img/maps/icons/de_whistle.svg'),
+    ('de_palais', 'Wingman', 'false',  null, '/img/maps/screenshots/de_palais.webp', '/img/maps/icons/de_palais.svg'),
+    ('de_whistle', 'Wingman', 'false',  null, '/img/maps/screenshots/de_whistle.webp', '/img/maps/icons/de_whistle.svg'),
 
     --  Workshop Wingman
     ('de_brewery', 'Wingman', 'false',  '3070290240', '/img/maps/screenshots/de_brewery.webp', '/img/maps/icons/de_brewery.svg'),
