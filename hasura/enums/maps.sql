@@ -1,7 +1,7 @@
 insert into e_match_types ("value", "description") values
-    ('Competitive', '5 vs 5 match using active map pool'),
-    ('Wingman', '2 vs 2 match'),
-    ('Duel', '1 vs 1 match')
+    ('Competitive', '5 vs 5'),
+    ('Wingman', '2 vs 2'),
+    ('Duel', '1 vs 1')
 on conflict(value) do update set "description" = EXCLUDED."description";
 
 insert into maps ("name", "type", "active_pool", "workshop_map_id", "poster", "patch") values
