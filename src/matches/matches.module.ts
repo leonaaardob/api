@@ -43,6 +43,7 @@ import { NotificationsModule } from "../notifications/notifications.module";
 import { ChatModule } from "src/chat/chat.module";
 import { HasuraService } from "src/hasura/hasura.service";
 import { EloCalculation } from "./jobs/EloCalculation";
+import { PostgresService } from "src/postgres/postgres.service";
 
 @Module({
   imports: [
@@ -108,7 +109,7 @@ export class MatchesModule implements NestModule {
     private readonly hasuraService: HasuraService,
     @InjectQueue(MatchQueues.MatchServers) matchServersQueue: Queue,
     @InjectQueue(MatchQueues.ScheduledMatches) scheduleMatchQueue: Queue,
-    @InjectQueue(MatchQueues.EloCalculation) private eloCalculationQueue: Queue,
+    private readonly postgres: PostgresService,
   ) {
     void scheduleMatchQueue.add(
       CheckForScheduledMatches.name,
@@ -203,13 +204,14 @@ export class MatchesModule implements NestModule {
       },
     });
 
-    this.eloCalculationQueue.setGlobalConcurrency(1);
     for (const match of matches.matches) {
-      this.eloCalculationQueue.add(EloCalculation.name, {
-        matchId: match.id,
-      });
+      await this.postgres.query(
+        `
+        SELECT generate_player_elo_for_match($1)
+      `,
+        [match.id],
+      );
     }
-    this.eloCalculationQueue.removeGlobalConcurrency();
   }
 
   configure(consumer: MiddlewareConsumer) {

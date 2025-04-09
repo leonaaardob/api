@@ -13,7 +13,7 @@ export class EloCalculation extends WorkerHost {
   async process(job: Job): Promise<void> {
     const { matchId } = job.data;
 
-    const result = await this.postgres.query(
+    await this.postgres.query(
       `
       SELECT generate_player_elo_for_match($1)
     `,
