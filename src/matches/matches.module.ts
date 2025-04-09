@@ -171,6 +171,10 @@ export class MatchesModule implements NestModule {
       },
     );
 
+    if (process.env.RUN_MIGRATIONS) {  
+      return;
+    }
+    
     void this.generatePlayerRatings();
   }
 
