@@ -53,7 +53,7 @@ BEGIN
     SELECT current INTO _current_player_elo
     FROM player_elo 
     WHERE steam_id = player_record.steam_id
-    AND created_at < match_record.created_at
+    AND created_at < match_record.ended_at
     AND match_id != match_record.id
     ORDER BY created_at DESC
     LIMIT 1;
@@ -87,7 +87,7 @@ BEGIN
                     SELECT current 
                     FROM player_elo pr2 
                     WHERE pr2.steam_id = mlp.steam_id
-                    AND pr2.created_at < match_record.created_at
+                    AND pr2.created_at < match_record.ended_at
                     AND pr2.match_id != match_record.id
                     ORDER BY pr2.created_at DESC
                     LIMIT 1
@@ -113,7 +113,7 @@ BEGIN
                     SELECT current 
                     FROM player_elo pr2 
                     WHERE pr2.steam_id = mlp.steam_id
-                    AND pr2.created_at < match_record.created_at
+                    AND pr2.created_at < match_record.ended_at
                     AND pr2.match_id != match_record.id
                     ORDER BY pr2.created_at DESC
                     LIMIT 1
@@ -297,7 +297,7 @@ BEGIN
             player_record.steam_id,
             current_elo + elo_change,
             elo_change,
-            match_record.created_at
+            match_record.ended_at
         );
         
         ratings_created := ratings_created + 1;

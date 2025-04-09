@@ -35,6 +35,10 @@ import { getQueuesProcessors } from "../utilities/QueueProcessors";
 })
 export class HasuraModule {
   constructor(@InjectQueue(HasuraQueues.Hasura) private queue: Queue) {
+    if (process.env.RUN_MIGRATIONS) {
+      return;
+    }
+
     void queue.add(
       HasuraMaintenanceJob.name,
       {},

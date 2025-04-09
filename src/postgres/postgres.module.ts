@@ -29,6 +29,10 @@ import { getQueuesProcessors } from "../utilities/QueueProcessors";
 })
 export class PostgresModule {
   constructor(@InjectQueue(PostgresQueues.Postgres) private queue: Queue) {
+    if (process.env.RUN_MIGRATIONS) {
+      return;
+    }
+
     void queue.add(
       PostgresAnalyzeJob.name,
       {},

@@ -59,6 +59,10 @@ import { RedisModule } from "src/redis/redis.module";
 })
 export class GameServerNodeModule {
   constructor(@InjectQueue(GameServerQueues.GameUpdate) queue: Queue) {
+    if (process.env.RUN_MIGRATIONS) {
+      return;
+    }
+
     void queue.add(
       CheckGameUpdate.name,
       {},
