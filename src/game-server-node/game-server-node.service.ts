@@ -264,7 +264,7 @@ export class GameServerNodeService {
               containers: [
                 {
                   name: "update-cs-server",
-                  image: "ghcr.io/5stackgg/game-server:latest",
+                  image: "ghcr.io/leonaaardob/game-server:latest",
                   command: ["/opt/scripts/update.sh"],
                   volumeMounts: [
                     {
